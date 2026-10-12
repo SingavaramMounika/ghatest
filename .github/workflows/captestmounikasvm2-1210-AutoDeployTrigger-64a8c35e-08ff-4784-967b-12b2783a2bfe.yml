@@ -1,0 +1,49 @@
+name: Trigger auto deployment for captestmounikasvm2-1210
+
+# When this action will be executed
+on:
+  # Automatically trigger it when detected changes in repo
+  push:
+    branches: 
+      [ test123 ]
+    paths:
+    - '**'
+    - '.github/workflows/captestmounikasvm2-1210-AutoDeployTrigger-64a8c35e-08ff-4784-967b-12b2783a2bfe.yml'
+
+  # Allow manual trigger 
+  workflow_dispatch:      
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    permissions: 
+      id-token: write #This is required for requesting the OIDC JWT Token
+      contents: read #Required when GH token is used to authenticate with private repo
+
+    steps:
+      - name: Checkout to the branch
+        uses: actions/checkout@v2
+
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.CAPTESTMOUNIKASVM21210_AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.CAPTESTMOUNIKASVM21210_AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.CAPTESTMOUNIKASVM21210_AZURE_SUBSCRIPTION_ID }}
+
+      - name: Build and push container image to registry
+        uses: azure/container-apps-deploy-action@v2
+        with:
+          appSourcePath: ${{ github.workspace }}
+          _dockerfilePathKey_: _dockerfilePath_
+          _targetLabelKey_: _targetLabel_
+          registryUrl: registrymounika3009.azurecr.io
+          registryUsername: ${{ secrets.CAPTESTMOUNIKASVM21210_REGISTRY_USERNAME }}
+          registryPassword: ${{ secrets.CAPTESTMOUNIKASVM21210_REGISTRY_PASSWORD }}
+          containerAppName: captestmounikasvm2-1210
+          resourceGroup: mounikatest0910
+          imageToBuild: registrymounika3009.azurecr.io/captestmounikasvm2-1210:${{ github.sha }}
+          _buildArgumentsKey_: |
+            _buildArgumentsValues_
+
+
